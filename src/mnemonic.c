@@ -152,6 +152,10 @@ enum {
 	MNEMONIC_ST,       /* __, Rr   dummy */
 	MNEMONIC_LDD,      /* Rd, _+q  dummy */
 	MNEMONIC_STD,      /* _+q, Rr  dummy */
+	MNEMONIC_XCH,      /* Z, Rd    1001 001d dddd 0100 */
+	MNEMONIC_LAS,      /* Z, Rd    1001 001d dddd 0101 */
+	MNEMONIC_LAC,      /* Z, Rd    1001 001d dddd 0110 */
+	MNEMONIC_LAT,      /* Z, Rd    1001 001d dddd 0111 */
 	MNEMONIC_COUNT,
 	MNEMONIC_LPM_Z,    /* Rd, Z    1001 000d dddd 0100 */
 	MNEMONIC_LPM_ZP,   /* Rd, Z+   1001 000d dddd 0101 */
@@ -306,6 +310,10 @@ struct instruction instruction_list[] = {
 	{"st",    0,          0},
 	{"ldd",   0,  DF_TINY1X},
 	{"std",   0,  DF_TINY1X},
+	{"xch",   0,  DF_NO_RMW},
+	{"las",   0,  DF_NO_RMW},
+	{"lac",   0,  DF_NO_RMW},
+	{"lat",   0,  DF_NO_RMW},
 	{"count", 0,          0},
 	{"lpm",   0x9004, DF_NO_LPM|DF_NO_LPM_X},
 	{"lpm",   0x9005, DF_NO_LPM|DF_NO_LPM_X},
@@ -335,6 +343,10 @@ struct instruction instruction_list[] = {
 	{"std",   0x8200, DF_TINY1X},
 	{"lds",   0xa000, DF_TINY1X},
 	{"sts",   0xa800, DF_TINY1X},
+	{"xch",   0x9204, DF_NO_RMW},
+	{"las",   0x9205, DF_NO_RMW},
+	{"lac",   0x9206, DF_NO_RMW},
+	{"lat",   0x9207, DF_NO_RMW},
 	{"end", 0, 0}
 };
 
@@ -629,6 +641,16 @@ parse_mnemonic(struct prog_info *pi)
 				opcode = ((i & 0x20) << 8) | ((i & 0x18) << 7) | (i & 0x07);
 				i = get_register(pi, operand2);
 				opcode |= i << 4;
+		} else if (mnemonic >= MNEMONIC_XCH && mnemonic <= MNEMONIC_LAT) {
+			/* RMW instructions: XCH, LAS, LAC, LAT Z,Rd */
+			/* First operand should be Z register */
+			i = get_indirect(pi, operand1);
+			if (i != 6) { /* 6 = Z register for indirect addressing */
+				print_msg(pi, MSGTYPE_ERROR, "%s only supports Z register addressing", instruction_list[mnemonic].mnemonic);
+			}
+			/* Second operand is the destination register */
+			i = get_register(pi, operand2);
+			opcode = i << 4;
 			} else
 				print_msg(pi, MSGTYPE_ERROR, "Shit! Missing opcode check [%d]...", mnemonic);
 		}

@@ -45,9 +45,10 @@
 #define DF_AVR8L     0x8000 /* Also known as AVRrc (reduced core)?
                              * ATtiny4,5,9,10,20,40,102,104: No ADIW, SBIW;
                              * one word LDS/STS */
+#define DF_NO_RMW    0x10000 /* No RMW (XCH, LAS, LAC, LAT) instructions
+                             * Only XMEGA B, C, and AU models support RMW */
 /* If more flags are added, the size of the flag field in struct device must
- * be increased! C ints are only guaranteed to be at least 16 bits, and we're
- * currently using all of them. */
+ * be increased! C ints are guaranteed to be at least 32 bits for RMW support. */
 
 struct device {
 	char *name;
