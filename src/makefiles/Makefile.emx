@@ -19,7 +19,7 @@ ARCHFILES = $(DISTFILES)
 
 BINFILES = avra README ChangeLog COPYING avra.1 avra.txt
 
-VERSION = 1.1.0
+VERSION = 1.5.0
 
 #********************************************************************
 
