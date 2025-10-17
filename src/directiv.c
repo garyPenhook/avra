@@ -625,8 +625,7 @@ parse_directive(struct prog_info *pi)
 			return (True);
 			break;
 		default:
-			if (pi->pass == PASS_2)
-				print_msg(pi, MSGTYPE_MESSAGE, "PRAGMA %s directive currently ignored", next);
+			/* PRAGMA directives are silently ignored */
 			return (True);
 		}
 		break;
