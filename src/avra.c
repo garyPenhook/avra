@@ -75,9 +75,32 @@ const struct dataset overlap_choice[4] = {
 const int SEG_BSS_DATA = 0x01;
 
 static struct prog_info PROG_INFO;
-static struct segment_info CODE_SEG;
-static struct segment_info DATA_SEG;
-static struct segment_info EEPROM_SEG;
+
+/* C23 designated initializers for segment definitions */
+static struct segment_info CODE_SEG = {
+	.name = "code",
+	.ident = 'C',
+	.cellsize = 2,
+	.cellname = "word",
+	.cellnames = "words"
+};
+
+static struct segment_info DATA_SEG = {
+	.name = "data",
+	.ident = 'D',
+	.cellsize = 1,
+	.flags = SEG_BSS_DATA,
+	.cellname = "byte",
+	.cellnames = "bytes"
+};
+
+static struct segment_info EEPROM_SEG = {
+	.name = "EEPROM",
+	.ident = 'E',
+	.cellsize = 1,
+	.cellname = "byte",
+	.cellnames = "bytes"
+};
 
 int
 main(int argc, const char *argv[])
@@ -347,28 +370,10 @@ init_prog_info(struct prog_info *pi, struct args *args)
 			pi->NoRegDef = 1;
 	}
 
+	/* Segments pre-initialized with C23 designated initializers */
 	pi->cseg = &CODE_SEG;
 	pi->dseg = &DATA_SEG;
 	pi->eseg = &EEPROM_SEG;
-	memset(pi->cseg, 0, sizeof(struct segment_info));
-	memset(pi->dseg, 0, sizeof(struct segment_info));
-	memset(pi->eseg, 0, sizeof(struct segment_info));
-
-	pi->cseg->name = "code";
-	pi->dseg->name = "data";
-	pi->eseg->name = "EEPROM";
-	pi->cseg->ident = 'C';
-	pi->dseg->ident = 'D';
-	pi->eseg->ident = 'E';
-
-	pi->dseg->flags = SEG_BSS_DATA;
-
-	pi->cseg->cellname = "word";
-	pi->dseg->cellname = "byte";
-	pi->eseg->cellname = "byte";
-	pi->cseg->cellnames = "words";
-	pi->dseg->cellnames = "bytes";
-	pi->eseg->cellnames = "bytes";
 
 	init_segment_size(pi, pi->device);
 
