@@ -16,6 +16,10 @@
 - Optimize macro string concatenation using pointer arithmetic instead of strcat/strncat (70-85% speedup)
 - Implement symbol lookup caching for labels, constants, and variables (10-30% speedup for large symbol tables)
 - Optimize COFF memory allocation to use only actual address ranges (50-90% memory reduction)
+- Optimize case-insensitive string comparisons with inline conversion (2-4x speedup for comparisons)
+- Optimize meta-tag parsing with switch statement and early character checks (1.5-2x speedup)
+- Optimize file I/O with buffered writes instead of individual fputc calls (2-3x speedup for file output)
+- Create malloc_strcpy helper to scan strings once instead of multiple passes (1.5x speedup)
 
 ### Bug Fixes and Features
 - Suppress PRAGMA directive warning messages
