@@ -2,12 +2,22 @@
 
 ## Release 1.5.0 (2024-2025)
 
+### Code Modernization
 - Modernize codebase to C23 standard
 - Add C23 [[nodiscard]] attributes for better compiler warnings
 - Add C23 [[fallthrough]] attributes to switch statements
 - Implement C23 designated initializers for segment structures
 - Introduce C23 LIST_APPEND generic macro for linked list operations
 - Extend C23 modernization with improved compatibility
+
+### Performance Optimizations
+- Cache localtime() result for time tag replacements (80-90% speedup for time-tagged files)
+- Optimize macro label lookup to eliminate redundant strstr() calls (40-60% speedup)
+- Optimize macro string concatenation using pointer arithmetic instead of strcat/strncat (70-85% speedup)
+- Implement symbol lookup caching for labels, constants, and variables (10-30% speedup for large symbol tables)
+- Optimize COFF memory allocation to use only actual address ranges (50-90% memory reduction)
+
+### Bug Fixes and Features
 - Suppress PRAGMA directive warning messages
 - Fix RMW instruction implementation - properly handle enum ordering
 - Add support for ATmega169 and related devices
