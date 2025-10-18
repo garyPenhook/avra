@@ -348,6 +348,7 @@ parse_directive(struct prog_info *pi)
 		}
 		break;
 	case DIRECTIVE_ENDM:
+		[[fallthrough]];
 	case DIRECTIVE_ENDMACRO:
 		print_msg(pi, MSGTYPE_ERROR, "No .MACRO found before .ENDMACRO");
 		break;
@@ -611,6 +612,7 @@ parse_directive(struct prog_info *pi)
 
 				case OVERLAP_IGNORE:
 				case OVERLAP_WARNING:
+					[[fallthrough]];
 				case OVERLAP_ERROR:
 					pi->effective_overlap = overlap_setting;
 					break;
@@ -692,6 +694,7 @@ parse_directive(struct prog_info *pi)
 		break;
 	case DIRECTIVE_ELSE:
 	case DIRECTIVE_ELIF:
+		[[fallthrough]];
 	case DIRECTIVE_ELSEIF:
 		if (!spool_conditional(pi, True))
 			return (False);
