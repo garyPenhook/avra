@@ -455,10 +455,10 @@ expand_macro(struct prog_info *pi, struct macro *macro, char *rest_line)
 		 * Only in case there is an entry in macro_label list */
 
 		strcpy(buff,"\0");
-		macro_label = get_macro_label(pi->macro_line->line,macro);
+		/* Optimized: use function that returns position to avoid redundant strstr() calls */
+		macro_label = get_macro_label_with_pos(pi->macro_line->line, macro, &temp);
 		if (macro_label)	{
 			/* test if the right macro label has been found */
-			temp = strstr(pi->macro_line->line,macro_label->label);
 			c = strlen(macro_label->label);
 			if (temp[c] == ':') { /* it is a label definition */
 				macro_label->running_number++;
@@ -475,7 +475,9 @@ expand_macro(struct prog_info *pi, struct macro *macro, char *rest_line)
 					/* Allow forward reference if label is not yet defined */
 					target_number++;
 				strcpy(buff,pi->macro_line->line);
-				temp = strstr(buff, macro_label->label);
+				/* Reuse offset to find position in buff without redundant strstr() */
+				char *label_offset = temp;
+				temp = buff + (label_offset - pi->macro_line->line);
 				i = temp - buff + strlen(macro_label->label);
 				strncpy(temp, macro_label->label, c - 1);
 				strcpy(&temp[c-1], itoa(target_number, tmp, 10));
@@ -485,6 +487,8 @@ expand_macro(struct prog_info *pi, struct macro *macro, char *rest_line)
 		}
 
 		/* here we check every character of current line */
+		/* Optimized: use direct pointer arithmetic instead of strcat/strncat to avoid O(n²) behavior */
+		char *buff_ptr = &buff[i];
 		for (j = i; pi->macro_line->line[i] != '\0'; i++) {
 			/* check for register place holders */
 			if (pi->macro_line->line[i] == '@') {
@@ -495,16 +499,20 @@ expand_macro(struct prog_info *pi, struct macro *macro, char *rest_line)
 					print_msg(pi, MSGTYPE_ERROR, "Missing macro argument (for @%c)", pi->macro_line->line[i]);
 				else {
 					/* and replace them with given registers */
-					strcat(&buff[j], macro_args[pi->macro_line->line[i] - '0']);
-					j += strlen(macro_args[pi->macro_line->line[i] - '0']);
+					const char *arg = macro_args[pi->macro_line->line[i] - '0'];
+					size_t arg_len = strlen(arg);
+					memcpy(buff_ptr, arg, arg_len);
+					buff_ptr += arg_len;
 				}
 			} else if (pi->macro_line->line[i] == ';') {
-				strncat(buff, "\n", 1);
+				*buff_ptr++ = '\n';
+				*buff_ptr = '\0';
 				break;
 			} else {
-				strncat(buff, &pi->macro_line->line[i], 1);
+				*buff_ptr++ = pi->macro_line->line[i];
 			}
 		}
+		*buff_ptr = '\0';  /* Ensure null termination */
 
 		ok = parse_line(pi, buff);
 		if (ok) {
@@ -527,12 +535,28 @@ expand_macro(struct prog_info *pi, struct macro *macro, char *rest_line)
 
 struct macro_label *get_macro_label(char *line, struct macro *macro)
 {
-	char *temp ;
+	char *temp;
 	struct macro_label *macro_label;
 
 	for (macro_label = macro->first_label; macro_label; macro_label = macro_label->next) {
-		temp = strstr(line,macro_label->label);
+		temp = strstr(line, macro_label->label);
 		if (temp) {
+			return macro_label;
+		}
+	}
+	return NULL;
+}
+
+/* Optimized version that also returns the position of the found label */
+struct macro_label *get_macro_label_with_pos(char *line, struct macro *macro, char **out_pos)
+{
+	char *temp;
+	struct macro_label *macro_label;
+
+	for (macro_label = macro->first_label; macro_label; macro_label = macro_label->next) {
+		temp = strstr(line, macro_label->label);
+		if (temp) {
+			*out_pos = temp;
 			return macro_label;
 		}
 	}

@@ -167,6 +167,10 @@ struct prog_info {
 	struct label *last_constant;
 	struct label *first_variable;
 	struct label *last_variable;
+	/* Performance optimization: cache last lookup to avoid re-scanning for frequently accessed symbols */
+	struct label *cached_label;
+	struct label *cached_constant;
+	struct label *cached_variable;
 	struct location *first_ifdef_blacklist;
 	struct location *last_ifdef_blacklist;
 	struct location *first_ifndef_blacklist;
@@ -376,6 +380,7 @@ int test_include(const char *filename);
 int read_macro(struct prog_info *pi, char *name);
 struct macro *get_macro(struct prog_info *pi, char *name);
 struct macro_label *get_macro_label(char *line, struct macro *macro);
+struct macro_label *get_macro_label_with_pos(char *line, struct macro *macro, char **out_pos);
 [[nodiscard]]
 int expand_macro(struct prog_info *pi, struct macro *macro, char *rest_line);
 

@@ -237,6 +237,10 @@ assemble(struct prog_info *pi)
 			if (pi->error_count == 0) {
 				pi->segment = pi->cseg;
 				rewind_segments(pi);
+				/* Optimization: clear symbol lookup cache for new pass */
+				pi->cached_label = NULL;
+				pi->cached_constant = NULL;
+				pi->cached_variable = NULL;
 				pi->pass=PASS_2;
 				if (load_arg_defines(pi)==False)
 					return -1;
@@ -690,14 +694,35 @@ struct label *test_variable(struct prog_info *pi,char *name,char *message)
 struct label *search_symbol(struct prog_info *pi,struct label *first,char *name,char *message)
 {
 	struct label *label;
-	for (label = first; label; label = label->next)
-		if (!nocase_strcmp(label->name, name)) {
-			if (message) {
-				print_msg(pi, MSGTYPE_ERROR, message, name);
+
+	/* Performance optimization: check cache before linear search */
+	/* This significantly speeds up repeated lookups in the same assembly pass */
+	if (first == pi->first_label && pi->cached_label && !nocase_strcmp(pi->cached_label->name, name))
+		label = pi->cached_label;
+	else if (first == pi->first_constant && pi->cached_constant && !nocase_strcmp(pi->cached_constant->name, name))
+		label = pi->cached_constant;
+	else if (first == pi->first_variable && pi->cached_variable && !nocase_strcmp(pi->cached_variable->name, name))
+		label = pi->cached_variable;
+	else {
+		/* Linear search for symbol */
+		label = NULL;
+		for (label = first; label; label = label->next)
+			if (!nocase_strcmp(label->name, name)) {
+				/* Cache this result for future lookups */
+				if (first == pi->first_label)
+					pi->cached_label = label;
+				else if (first == pi->first_constant)
+					pi->cached_constant = label;
+				else if (first == pi->first_variable)
+					pi->cached_variable = label;
+				break;
 			}
-			return (label);
-		}
-	return (NULL);
+	}
+
+	if (label && message) {
+		print_msg(pi, MSGTYPE_ERROR, message, name);
+	}
+	return (label);
 }
 
 int
@@ -780,6 +805,7 @@ free_labels(struct prog_info *pi)
 	}
 	pi->first_label = NULL;
 	pi->last_label = NULL;
+	pi->cached_label = NULL;  /* Clear label cache */
 }
 
 void
@@ -794,6 +820,7 @@ free_constants(struct prog_info *pi)
 	}
 	pi->first_constant = NULL;
 	pi->last_constant = NULL;
+	pi->cached_constant = NULL;  /* Clear constant cache */
 }
 
 void
@@ -834,6 +861,7 @@ free_variables(struct prog_info *pi)
 	}
 	pi->first_variable = NULL;
 	pi->last_variable = NULL;
+	pi->cached_variable = NULL;  /* Clear variable cache */
 }
 
 void

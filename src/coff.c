@@ -133,13 +133,29 @@ open_coff_file(struct prog_info *pi, char *filename)
 	}
 
 	/* Allocate space for binary output into ROM, and EEPROM memory buffers for COFF output */
+	/* Optimized: allocate only what's needed based on device usage instead of full device size */
 	/* ASSUMES ci->device is accurate */
-	if ((ci->pRomMemory = AllocateListObject(&ci->ListOfRawData, pi->device->flash_size * 2)) != 0) {
-		if ((ci->pEEPRomMemory = AllocateListObject(&ci->ListOfRawData, pi->device->eeprom_size)) != 0) {
+	size_t rom_size = pi->device->flash_size * 2;
+	size_t eeprom_size = pi->device->eeprom_size;
+
+	/* Calculate actual maximum used addresses from segment organization lists */
+	if (pi->cseg && pi->cseg->last_orglist && pi->cseg->last_orglist->length > 0) {
+		size_t used_flash = (pi->cseg->last_orglist->start + pi->cseg->last_orglist->length) * 2;  /* flash uses 2 bytes per word */
+		if (used_flash < rom_size)
+			rom_size = used_flash;
+	}
+	if (pi->eseg && pi->eseg->last_orglist && pi->eseg->last_orglist->length > 0) {
+		size_t used_eeprom = pi->eseg->last_orglist->start + pi->eseg->last_orglist->length;
+		if (used_eeprom < eeprom_size)
+			eeprom_size = used_eeprom;
+	}
+
+	if ((ci->pRomMemory = AllocateListObject(&ci->ListOfRawData, rom_size)) != 0) {
+		if ((ci->pEEPRomMemory = AllocateListObject(&ci->ListOfRawData, eeprom_size)) != 0) {
 			ok = True; /* only true if both buffers are properly allocated */
 			/* now fill them with 0xff's to simulate flash erasure */
-			memset((void *)ci->pRomMemory, 0xff, pi->device->flash_size * 2);
-			memset((void *)ci->pEEPRomMemory,    0xff,    pi->device->eeprom_size);
+			memset((void *)ci->pRomMemory, 0xff, rom_size);
+			memset((void *)ci->pEEPRomMemory, 0xff, eeprom_size);
 		}
 	}
 	if (ok != True)

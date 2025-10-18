@@ -209,29 +209,30 @@ parse_line(struct prog_info *pi, char *line)
 	ptr=line;
 	k=0;
 	len = strlen(ptr);
+	struct tm *time_info = localtime(&pi->time);  /* Cache localtime() result for all time tags */
 	while ((ptr=strchr(ptr, '%')) != NULL) {
 		if (!strncmp(ptr, "%MINUTE%", 8)) {		/* Replacement always shorter than tag -> no length check */
-			k=strftime(ptr, 3, "%M", localtime(&pi->time));
+			k=strftime(ptr, 3, "%M", time_info);
 			memmove(ptr+k, ptr+8, len - (ptr+8 - line) + 1);
 			ptr += k;
 			len -= 8-k;
 		} else if (!strncmp(ptr, "%HOUR%", 6)) {
-			k=strftime(ptr, 3, "%H", localtime(&pi->time));
+			k=strftime(ptr, 3, "%H", time_info);
 			memmove(ptr+k, ptr+6, len - (ptr+6 - line) + 1);
 			ptr += k;
 			len -= 6-k;
 		} else if (!strncmp(ptr, "%DAY%", 5)) {
-			k=strftime(ptr, 3, "%d", localtime(&pi->time));
+			k=strftime(ptr, 3, "%d", time_info);
 			memmove(ptr+k, ptr+5, len - (ptr+5 - line) + 1);
 			ptr += k;
 			len -= 5-k;
 		} else if (!strncmp(ptr, "%MONTH%", 7)) {
-			k=strftime(ptr, 3, "%m", localtime(&pi->time));
+			k=strftime(ptr, 3, "%m", time_info);
 			memmove(ptr+k, ptr+7, len - (ptr+7 - line) + 1);
 			ptr += k;
 			len -= 7-k;
 		} else if (!strncmp(ptr, "%YEAR%", 6)) {
-			k=strftime(ptr, 5, "%Y", localtime(&pi->time));
+			k=strftime(ptr, 5, "%Y", time_info);
 			memmove(ptr+k, ptr+6, len - (ptr+6 - line) + 1);
 			ptr += k;
 			len -= 6-k;
