@@ -26,55 +26,72 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 
 #include "misc.h"
 
-/* Case insensetive strcmp() */
+/* Optimization: inline case conversion without function call overhead */
+[[gnu::always_inline]] static inline unsigned char to_lower_inline(unsigned char c)
+{
+	return (c >= 'A' && c <= 'Z') ? (c + 32) : c;
+}
+
+/* Case insensetive strcmp() - Optimized with inline case conversion */
 int
 nocase_strcmp(const char *s, const char *t)
 {
+	unsigned char c1, c2;
 	int i;
 
-	for (i = 0; tolower(s[i]) == tolower(t[i]); i++)
-		if (s[i] == '\0')
+	for (i = 0; ; i++) {
+		c1 = to_lower_inline((unsigned char)s[i]);
+		c2 = to_lower_inline((unsigned char)t[i]);
+		if (c1 != c2)
+			return (c1 - c2);
+		if (c1 == '\0')
 			return (0);
-	return (tolower(s[i]) - tolower(t[i]));
+	}
 }
 
-/* Case insensetive strncmp() */
+/* Case insensetive strncmp() - Optimized with inline case conversion */
 int
 nocase_strncmp(char *s, char *t, int n)
 {
+	unsigned char c1, c2;
 	int i;
 
-	for (i = 0; (tolower(s[i]) == tolower(t[i])); i++, n--)
-		if ((s[i] == '\0') || (n == 1))
+	for (i = 0; n > 0; i++, n--) {
+		c1 = to_lower_inline((unsigned char)s[i]);
+		c2 = to_lower_inline((unsigned char)t[i]);
+		if (c1 != c2)
+			return (c1 - c2);
+		if (c1 == '\0')
 			return (0);
-	return (tolower(s[i]) - tolower(t[i]));
+	}
+	return (0);
 }
 
-/* Case insensetive strstr() */
+/* Case insensetive strstr() - Optimized with inline case conversion */
 char *
 nocase_strstr(char *s, char *t)
 {
-	int i = 0, j, found = False;
+	int i = 0, j;
+	unsigned char t_char, s_char;
 
-	while ((s[i] != '\0') && !found)	{
+	while (s[i] != '\0') {
 		j = 0;
-		while (tolower(t[j]) == tolower(s[i + j])) {
+		while ((s_char = to_lower_inline((unsigned char)s[i + j])) ==
+		       (t_char = to_lower_inline((unsigned char)t[j]))) {
 			j++;
-			if (t[j] == '\0') {
-				found = True;
-				break;
-			} else if (s[i + j] == '\0')
+			if (t[j] == '\0')
+				return (&s[i]);
+			if (s[i + j] == '\0')
 				break;
 		}
 		i++;
 	}
-	i--;
-	if (found)
-		return (&s[i]);
 	return (NULL);
 }
 
@@ -131,6 +148,24 @@ atox_n(char *s, int n)
 	return (ret);
 }
 
+
+/* Optimized malloc + strcpy wrapper - scans string only once */
+[[nodiscard]]
+char *malloc_strcpy(const char *src)
+{
+	size_t len;
+	char *dst;
+
+	if (!src)
+		return NULL;
+
+	len = strlen(src) + 1;
+	dst = malloc(len);
+	if (dst)
+		memcpy(dst, src, len);
+
+	return dst;
+}
 
 /* My own strlwr function since this one only exists in win. */
 char *

@@ -413,6 +413,8 @@ char *nocase_strstr(char *s, char *t);
 int atox(char *s);
 int atoi_n(char *s, int n);
 int atox_n(char *s, int n);
+[[nodiscard]]
+char *malloc_strcpy(const char *src);
 char *my_strlwr(char *in);
 char *my_strupr(char *in);
 char *snprint_list(char *buf, size_t limit, const char *const list[]);

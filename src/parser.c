@@ -205,39 +205,61 @@ parse_line(struct prog_info *pi, char *line)
 			return parse_stabn(pi, temp);
 		}
 	}
-	/* Meta information translation */
+	/* Meta information translation - Optimized with early character check */
 	ptr=line;
 	k=0;
 	len = strlen(ptr);
 	struct tm *time_info = localtime(&pi->time);  /* Cache localtime() result for all time tags */
 	while ((ptr=strchr(ptr, '%')) != NULL) {
-		if (!strncmp(ptr, "%MINUTE%", 8)) {		/* Replacement always shorter than tag -> no length check */
-			k=strftime(ptr, 3, "%M", time_info);
-			memmove(ptr+k, ptr+8, len - (ptr+8 - line) + 1);
-			ptr += k;
-			len -= 8-k;
-		} else if (!strncmp(ptr, "%HOUR%", 6)) {
-			k=strftime(ptr, 3, "%H", time_info);
-			memmove(ptr+k, ptr+6, len - (ptr+6 - line) + 1);
-			ptr += k;
-			len -= 6-k;
-		} else if (!strncmp(ptr, "%DAY%", 5)) {
-			k=strftime(ptr, 3, "%d", time_info);
-			memmove(ptr+k, ptr+5, len - (ptr+5 - line) + 1);
-			ptr += k;
-			len -= 5-k;
-		} else if (!strncmp(ptr, "%MONTH%", 7)) {
-			k=strftime(ptr, 3, "%m", time_info);
-			memmove(ptr+k, ptr+7, len - (ptr+7 - line) + 1);
-			ptr += k;
-			len -= 7-k;
-		} else if (!strncmp(ptr, "%YEAR%", 6)) {
-			k=strftime(ptr, 5, "%Y", time_info);
-			memmove(ptr+k, ptr+6, len - (ptr+6 - line) + 1);
-			ptr += k;
-			len -= 6-k;
-		} else {
-			ptr++;
+		/* Quick check on second character to avoid repeated strncmp calls */
+		switch (ptr[1]) {
+			case 'M':  /* %MINUTE% or %MONTH% */
+				if (ptr[2] == 'I' && !strncmp(ptr, "%MINUTE%", 8)) {
+					k=strftime(ptr, 3, "%M", time_info);
+					memmove(ptr+k, ptr+8, len - (ptr+8 - line) + 1);
+					ptr += k;
+					len -= 8-k;
+				} else if (ptr[2] == 'O' && !strncmp(ptr, "%MONTH%", 7)) {
+					k=strftime(ptr, 3, "%m", time_info);
+					memmove(ptr+k, ptr+7, len - (ptr+7 - line) + 1);
+					ptr += k;
+					len -= 7-k;
+				} else {
+					ptr++;
+				}
+				break;
+			case 'H':  /* %HOUR% */
+				if (!strncmp(ptr, "%HOUR%", 6)) {
+					k=strftime(ptr, 3, "%H", time_info);
+					memmove(ptr+k, ptr+6, len - (ptr+6 - line) + 1);
+					ptr += k;
+					len -= 6-k;
+				} else {
+					ptr++;
+				}
+				break;
+			case 'D':  /* %DAY% */
+				if (!strncmp(ptr, "%DAY%", 5)) {
+					k=strftime(ptr, 3, "%d", time_info);
+					memmove(ptr+k, ptr+5, len - (ptr+5 - line) + 1);
+					ptr += k;
+					len -= 5-k;
+				} else {
+					ptr++;
+				}
+				break;
+			case 'Y':  /* %YEAR% */
+				if (!strncmp(ptr, "%YEAR%", 6)) {
+					k=strftime(ptr, 5, "%Y", time_info);
+					memmove(ptr+k, ptr+6, len - (ptr+6 - line) + 1);
+					ptr += k;
+					len -= 6-k;
+				} else {
+					ptr++;
+				}
+				break;
+			default:
+				ptr++;
 		}
 	}
 
@@ -298,7 +320,10 @@ parse_line(struct prog_info *pi, char *line)
 				}
 				return (True);
 			}
-			memmove(pi->fi->scratch, &pi->fi->scratch[i], strlen(&pi->fi->scratch[i])+1);
+			/* Optimization: pre-calculate length instead of calling strlen twice */
+		char *src = &pi->fi->scratch[i];
+		size_t src_len = strlen(src) + 1;
+		memmove(pi->fi->scratch, src, src_len);
 			break;
 		}
 

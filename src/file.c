@@ -272,21 +272,27 @@ open_obj_file(struct prog_info *pi, const char *filename)
 
 	fp = fopen(filename, "wb");
 	if (fp) {
+		/* Optimization: buffer writes instead of individual fputc calls */
+		unsigned char buf[64];
+		int buf_pos = 0;
+
 		i = pi->cseg->count * 9 + 26;
-		fputc((i >> 24) & 0xff, fp);
-		fputc((i >> 16) & 0xff, fp);
-		fputc((i >> 8) & 0xff, fp);
-		fputc(i & 0xff, fp);
+		buf[buf_pos++] = (i >> 24) & 0xff;
+		buf[buf_pos++] = (i >> 16) & 0xff;
+		buf[buf_pos++] = (i >> 8) & 0xff;
+		buf[buf_pos++] = i & 0xff;
 		i = 26;
-		fputc((i >> 24) & 0xff, fp);
-		fputc((i >> 16) & 0xff, fp);
-		fputc((i >> 8) & 0xff, fp);
-		fputc(i & 0xff, fp);
-		fputc(9, fp);
+		buf[buf_pos++] = (i >> 24) & 0xff;
+		buf[buf_pos++] = (i >> 16) & 0xff;
+		buf[buf_pos++] = (i >> 8) & 0xff;
+		buf[buf_pos++] = i & 0xff;
+		buf[buf_pos++] = 9;
 		i = 0;
 		for (include_file = pi->first_include_file; include_file; include_file = include_file->next)
 			i++;
-		fputc(i, fp);
+		buf[buf_pos++] = i;
+		fwrite(buf, 1, buf_pos, fp);
+
 		fprintf(fp, "AVR Object File");
 		fputc('\0', fp);
 	}
@@ -311,18 +317,18 @@ close_obj_file(struct prog_info *pi, FILE *fp)
 void
 write_obj_record(struct prog_info *pi, int address, int data)
 {
-	fputc((address >> 16) & 0xff, pi->obj_file);
-	fputc((address >> 8) & 0xff, pi->obj_file);
-	fputc(address & 0xff, pi->obj_file);
-	fputc((data >> 8) & 0xff, pi->obj_file);
-	fputc(data & 0xff, pi->obj_file);
-	fputc(pi->fi->include_file->num & 0xff, pi->obj_file);
-	fputc((pi->fi->line_number >> 8) & 0xff, pi->obj_file);
-	fputc(pi->fi->line_number & 0xff, pi->obj_file);
-	if (pi->macro_call)
-		fputc(1, pi->obj_file);
-	else
-		fputc(0, pi->obj_file);
+	/* Optimization: batch writes into buffer instead of individual fputc calls */
+	unsigned char buf[10];
+	buf[0] = (address >> 16) & 0xff;
+	buf[1] = (address >> 8) & 0xff;
+	buf[2] = address & 0xff;
+	buf[3] = (data >> 8) & 0xff;
+	buf[4] = data & 0xff;
+	buf[5] = pi->fi->include_file->num & 0xff;
+	buf[6] = (pi->fi->line_number >> 8) & 0xff;
+	buf[7] = pi->fi->line_number & 0xff;
+	buf[8] = (pi->macro_call) ? 1 : 0;
+	fwrite(buf, 1, 9, pi->obj_file);
 }
 
 /* end of file.c */

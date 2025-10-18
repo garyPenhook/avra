@@ -174,22 +174,27 @@ def_dev(struct prog_info *pi)
 struct device *get_device(struct prog_info *pi, char *name)
 {
 	int i = 1;
+	struct device *result = NULL;
 
 	LastDevice = 0;
 	if (name == NULL) {
 		def_dev(pi);
 		return (&device_list[0]);
 	}
+
+	/* Linear search through device list - kept simple for reliability
+	   The device_list may not be sorted, so binary search isn't always safe */
 	while (device_list[i].name) {
 		if (!nocase_strcmp(name, device_list[i].name)) {
-			LastDevice=i;
-			def_dev(pi);
-			return (&device_list[i]);
+			LastDevice = i;
+			result = &device_list[i];
+			break;
 		}
 		i++;
 	}
+
 	def_dev(pi);
-	return (NULL);
+	return result;
 }
 
 /* Pre-define devices. */
