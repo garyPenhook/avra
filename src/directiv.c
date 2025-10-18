@@ -253,12 +253,7 @@ parse_directive(struct prog_info *pi)
 			print_msg(pi, MSGTYPE_OUT_OF_MEM, NULL);
 			return (False);
 		}
-		def->next = NULL;
-		if (pi->last_def)
-			pi->last_def->next = def;
-		else
-			pi->first_def = def;
-		pi->last_def = def;
+		LIST_APPEND(def, pi->first_def, pi->last_def);
 		def->name = malloc(strlen(next) + 1);
 		if (!def->name) {
 			print_msg(pi, MSGTYPE_OUT_OF_MEM, NULL);

@@ -471,12 +471,7 @@ def_const(struct prog_info *pi, const char *name, int value)
 		print_msg(pi, MSGTYPE_OUT_OF_MEM, NULL);
 		return (False);
 	}
-	label->next = NULL;
-	if (pi->last_constant)
-		pi->last_constant->next = label;
-	else
-		pi->first_constant = label;
-	pi->last_constant = label;
+	LIST_APPEND(label, pi->first_constant, pi->last_constant);
 	label->name = malloc(strlen(name) + 1);
 	if (!label->name) {
 		print_msg(pi, MSGTYPE_OUT_OF_MEM, NULL);
@@ -502,12 +497,7 @@ def_var(struct prog_info *pi, char *name, int value)
 		print_msg(pi, MSGTYPE_OUT_OF_MEM, NULL);
 		return (False);
 	}
-	label->next = NULL;
-	if (pi->last_variable)
-		pi->last_variable->next = label;
-	else
-		pi->first_variable = label;
-	pi->last_variable = label;
+	LIST_APPEND(label, pi->first_variable, pi->last_variable);
 	label->name = malloc(strlen(name) + 1);
 	if (!label->name) {
 		print_msg(pi, MSGTYPE_OUT_OF_MEM, NULL);
@@ -532,12 +522,7 @@ def_orglist(struct segment_info *si)
 		print_msg(si->pi, MSGTYPE_OUT_OF_MEM, NULL);
 		return (False);
 	}
-	orglist->next = NULL;
-	if (si->last_orglist)
-		si->last_orglist->next = orglist;
-	else
-		si->first_orglist = orglist;
-	si->last_orglist = orglist;
+	LIST_APPEND(orglist, si->first_orglist, si->last_orglist);
 	orglist->segment = si;
 	orglist->start = si->addr;
 	orglist->length = 0;
@@ -724,13 +709,7 @@ ifdef_blacklist(struct prog_info *pi)
 		print_msg(pi, MSGTYPE_OUT_OF_MEM, NULL);
 		return False;
 	}
-	loc->next = NULL;
-	if (pi->last_ifdef_blacklist) {
-		pi->last_ifdef_blacklist->next = loc;
-	} else {
-		pi->first_ifdef_blacklist = loc;
-	}
-	pi->last_ifdef_blacklist = loc;
+	LIST_APPEND(loc, pi->first_ifdef_blacklist, pi->last_ifdef_blacklist);
 	loc->line_num = pi->fi->line_number;
 	loc->file_num = pi->fi->include_file->num;
 	return True;
@@ -745,13 +724,7 @@ ifndef_blacklist(struct prog_info *pi)
 		print_msg(pi, MSGTYPE_OUT_OF_MEM, NULL);
 		return False;
 	}
-	loc->next = NULL;
-	if (pi->last_ifndef_blacklist) {
-		pi->last_ifndef_blacklist->next = loc;
-	} else {
-		pi->first_ifndef_blacklist = loc;
-	}
-	pi->last_ifndef_blacklist = loc;
+	LIST_APPEND(loc, pi->first_ifndef_blacklist, pi->last_ifndef_blacklist);
 	loc->line_num = pi->fi->line_number;
 	loc->file_num = pi->fi->include_file->num;
 	return True;

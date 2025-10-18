@@ -39,3 +39,17 @@ enum filetype {
 	MOTOROLA
 };
 
+/* C23 Generic List Append Macro
+ * Appends a node to a linked list with first/last pointers.
+ * Works with any struct type that has a 'next' field pointing to the same type.
+ * Usage: LIST_APPEND(node, container->first_list, container->last_list)
+ */
+#define LIST_APPEND(node, first_ptr, last_ptr) do { \
+	(node)->next = NULL; \
+	if ((last_ptr)) \
+		(last_ptr)->next = (node); \
+	else \
+		(first_ptr) = (node); \
+	(last_ptr) = (node); \
+} while(0)
+
