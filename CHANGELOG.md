@@ -1,5 +1,18 @@
 # ARVA Change log
 
+## Release 1.5.0 (2024-2025)
+
+- Modernize codebase to C23 standard
+- Add C23 [[nodiscard]] attributes for better compiler warnings
+- Add C23 [[fallthrough]] attributes to switch statements
+- Implement C23 designated initializers for segment structures
+- Introduce C23 LIST_APPEND generic macro for linked list operations
+- Extend C23 modernization with improved compatibility
+- Suppress PRAGMA directive warning messages
+- Fix RMW instruction implementation - properly handle enum ordering
+- Add support for ATmega169 and related devices
+- Clean up repository by removing outdated documentation files
+
 ## Release 1.4.2 (2020-07-18, by Burkhard Arenfeld, Robert Russell, and others)
 
 - Remove bug with wrong start of DSEG for processors with SRAM start != 0x60
