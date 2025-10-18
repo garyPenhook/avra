@@ -38,6 +38,11 @@
 	return (c >= 'A' && c <= 'Z') ? (c + 32) : c;
 }
 
+[[gnu::always_inline]] static inline unsigned char to_upper_inline(unsigned char c)
+{
+	return (c >= 'a' && c <= 'z') ? (c - 32) : c;
+}
+
 /* Case insensetive strcmp() - Optimized with inline case conversion */
 int
 nocase_strcmp(const char *s, const char *t)
@@ -168,26 +173,24 @@ char *malloc_strcpy(const char *src)
 }
 
 /* My own strlwr function since this one only exists in win. */
+/* Optimization: use pointer-based traversal instead of array indexing */
 char *
 my_strlwr(char *in)
 {
-	int i;
-
-	for (i = 0; in[i] != '\0'; i++)
-		in[i] = tolower(in[i]);
+	for (char *ptr = in; *ptr != '\0'; ptr++)
+		*ptr = to_lower_inline((unsigned char)*ptr);
 
 	return (in);
 }
 
 
 /* My own strupr function since this one only exists in win. */
+/* Optimization: use pointer-based traversal instead of array indexing */
 char *
 my_strupr(char *in)
 {
-	int i;
-
-	for (i = 0; in[i] != '\0'; i++)
-		in[i] = toupper(in[i]);
+	for (char *ptr = in; *ptr != '\0'; ptr++)
+		*ptr = to_upper_inline((unsigned char)*ptr);
 
 	return (in);
 }

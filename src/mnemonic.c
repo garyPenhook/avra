@@ -699,10 +699,15 @@ get_mnemonic_type(struct prog_info *pi)
 
 	mnemonic = my_strlwr(pi->fi->scratch);
 
-	for (int i = 0; i < MNEMONIC_COUNT; i++) {
-		if (!strcmp(mnemonic, instruction_list[i].mnemonic)) {
-			return (i);
+	/* Optimization: use pointer-based traversal instead of array indexing */
+	const struct instruction *instr = instruction_list;
+	int index = 0;
+	while (instr->mnemonic != NULL) {
+		if (!strcmp(mnemonic, instr->mnemonic)) {
+			return (index);
 		}
+		instr++;
+		index++;
 	}
 	return (-1);
 }
@@ -720,8 +725,18 @@ get_register(struct prog_info *pi, char *data)
 	if (second_reg != NULL)
 		data = second_reg + 1;
 
+	/* Optimization: check cache for recently accessed register definitions */
+	if (pi->cached_register_def && pi->cached_register_name &&
+	    !nocase_strcmp(pi->cached_register_name, data)) {
+		return (pi->cached_register_def->reg);
+	}
+
+	/* Linear search through defined registers */
 	for (def = pi->first_def; def; def = def->next)
 		if (!nocase_strcmp(def->name, data)) {
+			/* Cache this result for future lookups */
+			pi->cached_register_def = def;
+			pi->cached_register_name = data;
 			reg = def->reg;
 			return (reg);
 		}

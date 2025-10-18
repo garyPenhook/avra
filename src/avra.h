@@ -171,6 +171,9 @@ struct prog_info {
 	struct label *cached_label;
 	struct label *cached_constant;
 	struct label *cached_variable;
+	/* Performance optimization: cache register definition lookups (r0-r31 used repeatedly) */
+	struct def *cached_register_def;
+	const char *cached_register_name;
 	struct location *first_ifdef_blacklist;
 	struct location *last_ifdef_blacklist;
 	struct location *first_ifndef_blacklist;
