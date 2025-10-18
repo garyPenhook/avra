@@ -173,7 +173,7 @@ close_out_files(struct prog_info *pi)
 		close_coff_file(pi, pi->coff_file);
 }
 
-struct hex_file_info *
+[[nodiscard]] struct hex_file_info *
 open_hex_file(const char *filename)
 {
 	struct hex_file_info *hfi;
@@ -263,7 +263,7 @@ do_hex_line(struct hex_file_info *hfi)
 }
 
 
-FILE *
+[[nodiscard]] FILE *
 open_obj_file(struct prog_info *pi, const char *filename)
 {
 	int i;

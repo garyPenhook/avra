@@ -342,7 +342,7 @@ par_length(char *data)
 	}
 }
 
-int
+[[nodiscard]] int
 get_expr(struct prog_info *pi, char *data, int *value)
 {
 	/* Definition */
@@ -530,6 +530,7 @@ get_expr(struct prog_info *pi, char *data, int *value)
 				break;
 			case '~':
 				element->data = ~element->data;
+				break;
 			}
 			*last_element = element;
 			last_element = &element->next;
