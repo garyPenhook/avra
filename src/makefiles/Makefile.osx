@@ -1,4 +1,5 @@
 CC=gcc
+CFLAGS=-Wall -O3 -std=c23
 SOURCE=args.c \
         avra.c \
         coff.c \
@@ -13,5 +14,5 @@ SOURCE=args.c \
         stdextra.c
 
 all:
-	$(CC) $(CDEFS) -o avra $(SOURCE)
+	$(CC) $(CFLAGS) $(CDEFS) -o avra $(SOURCE)
 

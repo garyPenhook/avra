@@ -4,7 +4,7 @@
 
 CC = gcc
 LD = gcc
-CFLAGS = -Wall -O3
+CFLAGS = -Wall -O3 -std=c23
 LDFLAGS = -s
 
 SOURCES = avra.c device.c parser.c expr.c mnemonic.c directiv.c macro.c file.c map.c coff.c

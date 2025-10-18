@@ -31,11 +31,11 @@
 #include <stdio.h>
 #include <time.h>
 
-#define IS_HOR_SPACE(x)	((x == ' ') || (x == 9))
-#define IS_LABEL(x)	(isalnum(x) || (x == '%') || (x == '_'))
-#define IS_END_OR_COMMENT(x)	((x == ';') || (x == 10) || (x == 13) || (x == '\0') || (x == 12))
-#define IS_ENDLINE(x)	((x == 10) || (x == 13) || (x == '\0') || (x == 12))
-#define IS_SEPARATOR(x)	((x == ' ') || (x == ',') || (x == '[') || (x == ']'))
+#define IS_HOR_SPACE(x)	(((x) == ' ') || ((x) == 9))
+#define IS_LABEL(x)	(isalnum((x)) || ((x) == '%') || ((x) == '_'))
+#define IS_END_OR_COMMENT(x)	(((x) == ';') || ((x) == 10) || ((x) == 13) || ((x) == '\0') || ((x) == 12))
+#define IS_ENDLINE(x)	(((x) == 10) || ((x) == 13) || ((x) == '\0') || ((x) == 12))
+#define IS_SEPARATOR(x)	(((x) == ' ') || ((x) == ',') || ((x) == '[') || ((x) == ']'))
 
 #ifndef VERSION
 #define VERSION "undefined"

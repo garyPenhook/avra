@@ -610,8 +610,7 @@ parse_mnemonic(struct prog_info *pi)
 					mnemonic = MNEMONIC_LDD_Y;
 				else
 					print_msg(pi, MSGTYPE_ERROR, "Garbage in second operand (%s)", operand2);
-				i = 1;
-				while ((operand2[i] != '\0') && (operand2[i] != '+')) i++;
+				for (i = 1; (operand2[i] != '\0') && (operand2[i] != '+'); i++);
 				if (operand2[i] == '\0')	{
 					print_msg(pi, MSGTYPE_ERROR, "Garbage in second operand (%s)", operand2);
 					return (False);
@@ -628,8 +627,7 @@ parse_mnemonic(struct prog_info *pi)
 					mnemonic = MNEMONIC_STD_Y;
 				else
 					print_msg(pi, MSGTYPE_ERROR, "Garbage in first operand (%s)", operand1);
-				i = 1;
-				while ((operand1[i] != '\0') && (operand1[i] != '+')) i++;
+				for (i = 1; (operand1[i] != '\0') && (operand1[i] != '+'); i++);
 				if (operand1[i] == '\0')	{
 					print_msg(pi, MSGTYPE_ERROR, "Garbage in first operand (%s)", operand1);
 					return (False);
@@ -696,12 +694,11 @@ parse_mnemonic(struct prog_info *pi)
 int
 get_mnemonic_type(struct prog_info *pi)
 {
-	int i;
 	char *mnemonic;
 
 	mnemonic = my_strlwr(pi->fi->scratch);
 
-	for (i = 0; i < MNEMONIC_COUNT; i++) {
+	for (int i = 0; i < MNEMONIC_COUNT; i++) {
 		if (!strcmp(mnemonic, instruction_list[i].mnemonic)) {
 			return (i);
 		}
@@ -853,12 +850,11 @@ is_supported(struct prog_info *pi, char *name)
 int
 count_supported_instructions(int flags)
 {
-	int i = 0, count = 0;
-	while (i < MNEMONIC_END) {
+	int count = 0;
+	for (int i = 0; i < MNEMONIC_END; i++) {
 		if ((i < MNEMONIC_LD) || (i > MNEMONIC_COUNT))
 			if (!(flags & instruction_list[i].flag))
 				count++;
-		i++;
 	}
 	return (count);
 }
