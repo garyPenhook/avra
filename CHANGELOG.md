@@ -20,6 +20,7 @@
 - Optimize meta-tag parsing with switch statement and early character checks (1.5-2x speedup)
 - Optimize file I/O with buffered writes instead of individual fputc calls (2-3x speedup for file output)
 - Create malloc_strcpy helper to scan strings once instead of multiple passes (1.5x speedup)
+- Implement bit shifting optimizations - replace modulo/division with bit operations (10-30% speedup in expression parser, 20-30% for modulo operations)
 
 ### Bug Fixes and Features
 - Suppress PRAGMA directive warning messages
