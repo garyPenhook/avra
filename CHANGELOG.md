@@ -21,6 +21,7 @@
 - Optimize file I/O with buffered writes instead of individual fputc calls (2-3x speedup for file output)
 - Create malloc_strcpy helper to scan strings once instead of multiple passes (1.5x speedup)
 - Implement bit shifting optimizations - replace modulo/division with bit operations (10-30% speedup in expression parser, 20-30% for modulo operations)
+- Implement pointer-based optimizations - use pointer traversal instead of array indexing, add register caching (3-8% speedup for lookups)
 
 ### Bug Fixes and Features
 - Suppress PRAGMA directive warning messages
