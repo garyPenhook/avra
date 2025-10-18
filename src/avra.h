@@ -275,7 +275,9 @@ struct location {
 
 /* Prototypes */
 /* avra.c */
+[[nodiscard]]
 int assemble(struct prog_info *pi);
+[[nodiscard]]
 int load_arg_defines(struct prog_info *pi);
 struct prog_info *init_prog_info(struct prog_info *,struct args *args);
 void free_pi(struct prog_info *pi);
@@ -286,25 +288,38 @@ void init_segment_size(struct prog_info *pi, struct device *device);
 void rewind_segments(struct prog_info *pi);
 void advance_ip(struct segment_info *si, int offset);
 
+[[nodiscard]]
 int def_const(struct prog_info *pi, const char *name, int value);
+[[nodiscard]]
 int def_var(struct prog_info *pi, char *name, int value);
+[[nodiscard]]
 int def_orglist(struct segment_info *si);
+[[nodiscard]]
 int fix_orglist(struct segment_info *si);
 void fprint_orglist(FILE *file, struct segment_info *si, struct orglist *orglist);
 void fprint_sef_orglist(FILE *file, struct segment_info *si);
 void fprint_segments(FILE *file, struct prog_info *pi);
+[[nodiscard]]
 int test_orglist(struct segment_info *si);
+[[nodiscard]]
 int get_label(struct prog_info *pi,char *name,int *value);
+[[nodiscard]]
 int get_constant(struct prog_info *pi,char *name,int *value);
+[[nodiscard]]
 int get_variable(struct prog_info *pi,char *name,int *value);
 struct label *test_label(struct prog_info *pi,char *name,char *message);
 struct label *test_constant(struct prog_info *pi,char *name,char *message);
 struct label *test_variable(struct prog_info *pi,char *name,char *message);
 struct label *search_symbol(struct prog_info *pi,struct label *first,char *name,char *message);
+[[nodiscard]]
 int ifdef_blacklist(struct prog_info *pi);
+[[nodiscard]]
 int ifndef_blacklist(struct prog_info *pi);
+[[nodiscard]]
 int ifdef_is_blacklisted(struct prog_info *pi);
+[[nodiscard]]
 int ifndef_is_blacklisted(struct prog_info *pi);
+[[nodiscard]]
 int search_location(struct location *first, int line_num, int file_num);
 void free_defs(struct prog_info *pi);
 void free_labels(struct prog_info *pi);
@@ -315,51 +330,68 @@ void free_variables(struct prog_info *pi);
 void free_orglist(struct prog_info *pi);
 
 /* parser.c */
+[[nodiscard]]
 int parse_file(struct prog_info *pi, const char *filename);
+[[nodiscard]]
 int parse_line(struct prog_info *pi, char *line);
 char *get_next_token(char *scratch, int term);
 char *fgets_new(struct prog_info *pi, char *s, int size, FILE *stream);
 
 /* expr.c */
+[[nodiscard]]
 int get_expr(struct prog_info *pi, char *data, int *value);
+[[nodiscard]]
 int get_symbol(struct prog_info *pi, char *label_name, int *data);
+[[nodiscard]]
 int par_length(char *data);
 
 /* mnemonic.c */
+[[nodiscard]]
 int parse_mnemonic(struct prog_info *pi);
 int get_mnemonic_type(struct prog_info *pi);
 int get_register(struct prog_info *pi, char *data);
+[[nodiscard]]
 int get_bitnum(struct prog_info *pi, char *data, int *ret);
 int get_indirect(struct prog_info *pi, char *operand);
 int is_supported(struct prog_info *pi, char *name);
 int count_supported_instructions(int flags);
 
 /* directiv.c */
+[[nodiscard]]
 int parse_directive(struct prog_info *pi);
 int lookup_keyword(const char *const keyword_list[], const char *const keyword, int strict);
 char *term_string(struct prog_info *pi, char *string);
+[[nodiscard]]
 int parse_db(struct prog_info *pi, char *next);
 void write_db(struct prog_info *pi, char byte, char *prev, int count);
+[[nodiscard]]
 int spool_conditional(struct prog_info *pi, int only_endif);
+[[nodiscard]]
 int check_conditional(struct prog_info *pi, char *buff, int *current_depth, int *do_next, int only_endif);
+[[nodiscard]]
 int test_include(const char *filename);
 
 /* macro.c */
+[[nodiscard]]
 int read_macro(struct prog_info *pi, char *name);
 struct macro *get_macro(struct prog_info *pi, char *name);
 struct macro_label *get_macro_label(char *line, struct macro *macro);
+[[nodiscard]]
 int expand_macro(struct prog_info *pi, struct macro *macro, char *rest_line);
 
 
 /* file.c */
+[[nodiscard]]
 int open_out_files(struct prog_info *pi, const char *basename, const char *outputfile,
                    const char *debugfile, const char *eepfile);
 void close_out_files(struct prog_info *pi);
+[[nodiscard]]
 struct hex_file_info *open_hex_file(const char *filename);
 void close_hex_file(struct hex_file_info *hfi);
 void write_ee_byte(struct prog_info *pi, int address, unsigned char data);
 void write_prog_word(struct prog_info *pi, int address, int data);
 void do_hex_line(struct hex_file_info *hfi);
+[[nodiscard]]
 FILE *open_obj_file(struct prog_info *pi, const char *filename);
 void close_obj_file(struct prog_info *pi, FILE *fp);
 void write_obj_record(struct prog_info *pi, int address, int data);
@@ -381,12 +413,15 @@ char *my_strupr(char *in);
 char *snprint_list(char *buf, size_t limit, const char *const list[]);
 
 /* coff.c */
+[[nodiscard]]
 FILE *open_coff_file(struct prog_info *pi, char *filename);
 void write_coff_file(struct prog_info *pi);
 void write_coff_eeprom(struct prog_info *pi, int address, unsigned char data);
 void write_coff_program(struct prog_info *pi, int address, unsigned int data);
 void close_coff_file(struct prog_info *pi, FILE *fp);
+[[nodiscard]]
 int parse_stabs(struct prog_info *pi, char *p);
+[[nodiscard]]
 int parse_stabn(struct prog_info *pi, char *p);
 
 #endif /* end of avra.h */

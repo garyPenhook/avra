@@ -25,7 +25,12 @@
  *     www: https://github.com/Ro5bert/avra
  */
 
-enum boolean {False = 0, True};
+/* C23 boolean types - using stdbool.h for compatibility */
+#include <stdbool.h>
+
+/* Compatibility macros for legacy True/False usage */
+#define True true
+#define False false
 
 enum filetype {
 	AVRSTUDIO = 0,
