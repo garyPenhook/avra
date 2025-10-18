@@ -475,13 +475,14 @@ parse_mnemonic(struct prog_info *pi)
 				opcode |= ((i & 0x10) << 5) | (i & 0x0f);
 			} else if (mnemonic <= MNEMONIC_MOVW) {
 				i = get_register(pi, operand1);
-				if ((i % 2) == 1)
+				/* Optimization: use bitwise AND for parity check instead of modulo */
+				if ((i & 1) == 1)
 					print_msg(pi, MSGTYPE_ERROR, "%s must use a even numbered register for Rd", instruction_list[mnemonic].mnemonic);
-				opcode = (i / 2) << 4;
+				opcode = (i >> 1) << 4;  /* Optimization: use bit shift for division by 2 */
 				i = get_register(pi, operand2);
-				if ((i % 2) == 1)
+				if ((i & 1) == 1)
 					print_msg(pi, MSGTYPE_ERROR, "%s must use a even numbered register for Rr", instruction_list[mnemonic].mnemonic);
-				opcode |= i / 2;
+				opcode |= i >> 1;  /* Optimization: use bit shift for division by 2 */
 			} else if (mnemonic <= MNEMONIC_MULS) {
 				i = get_register(pi, operand1);
 				if (i < 16)
@@ -504,7 +505,7 @@ parse_mnemonic(struct prog_info *pi)
 				i = get_register(pi, operand1);
 				if (!((i == 24) || (i == 26) || (i == 28) || (i == 30)))
 					print_msg(pi, MSGTYPE_ERROR, "%s can only use registers R24, R26, R28 or R30", instruction_list[mnemonic].mnemonic);
-				opcode = ((i - 24) / 2) << 4;
+				opcode = ((i - 24) >> 1) << 4;  /* Optimization: use bit shift for division by 2 */
 				if (!get_expr(pi, operand2, &i))
 					return (False);
 				if ((i < 0) || (i > 63))

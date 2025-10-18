@@ -363,7 +363,8 @@ get_expr(struct prog_info *pi, char *data, int *value)
 		if (IS_HOR_SPACE(data[i]));
 		/* test for clean or premature end */
 		else if (IS_END_OR_COMMENT(data[i])) {
-			if ((count % 2) != 1)
+			/* Optimization: use bitwise AND instead of modulo for parity check */
+			if ((count & 1) != 1)
 				print_msg(pi, MSGTYPE_ERROR, "Missing value in expression");
 			else
 				end = True;
@@ -371,7 +372,7 @@ get_expr(struct prog_info *pi, char *data, int *value)
 		} else if (first_flag && IS_UNARY(data[i])) {
 			unary = data[i];
 			first_flag = False;
-		} else if ((count % 2) == 1) {
+		} else if ((count & 1) == 1) {  /* Optimization: bitwise AND for odd check */
 			if (!IS_OPERATOR(data[i])) {
 				print_msg(pi, MSGTYPE_ERROR, "Illegal operator '%c'", data[i]);
 				break;

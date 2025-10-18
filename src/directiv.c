@@ -837,7 +837,8 @@ parse_db(struct prog_info *pi, char *next)
 		next = data;
 	}
 	if (pi->segment == pi->cseg) { /* XXX PAD */
-		if ((count % 2) == 1) {
+		/* Optimization: use bitwise AND for parity check instead of modulo */
+		if ((count & 1) == 1) {
 			if (pi->pass == PASS_2)  {
 				if (pi->list_on) fprintf(pi->list_file, "00 ; zero byte added");
 				write_prog_word(pi, pi->segment->addr, prev & 0xFF);
@@ -864,7 +865,8 @@ write_db(struct prog_info *pi, char byte, char *prev, int count)
 		advance_ip(pi->eseg, 1);
 	}
 	if (pi->segment == pi->cseg) {
-		if ((count % 2) == 0) {
+		/* Optimization: use bitwise AND for parity check instead of modulo */
+		if ((count & 1) == 0) {
 			if (pi->pass == PASS_2) {
 				write_prog_word(pi, pi->cseg->addr, (byte << 8) | (*prev & 0xff));
 			}

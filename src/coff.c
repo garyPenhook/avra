@@ -135,12 +135,13 @@ open_coff_file(struct prog_info *pi, char *filename)
 	/* Allocate space for binary output into ROM, and EEPROM memory buffers for COFF output */
 	/* Optimized: allocate only what's needed based on device usage instead of full device size */
 	/* ASSUMES ci->device is accurate */
-	size_t rom_size = pi->device->flash_size * 2;
+	/* Optimization: use bit shift for multiplication by 2 (flash uses 2 bytes per word) */
+	size_t rom_size = pi->device->flash_size << 1;
 	size_t eeprom_size = pi->device->eeprom_size;
 
 	/* Calculate actual maximum used addresses from segment organization lists */
 	if (pi->cseg && pi->cseg->last_orglist && pi->cseg->last_orglist->length > 0) {
-		size_t used_flash = (pi->cseg->last_orglist->start + pi->cseg->last_orglist->length) * 2;  /* flash uses 2 bytes per word */
+		size_t used_flash = (pi->cseg->last_orglist->start + pi->cseg->last_orglist->length) << 1;  /* flash uses 2 bytes per word */
 		if (used_flash < rom_size)
 			rom_size = used_flash;
 	}
